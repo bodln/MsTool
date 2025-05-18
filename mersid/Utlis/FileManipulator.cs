@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using mersid.Models;
 
-namespace mersid
+namespace mersid.Utlis
 {
     public static class FileManipulator
     {
@@ -53,6 +53,22 @@ namespace mersid
                 double val = ParseCell(ws.Cell(row, valueCol).GetString());
                 int flag = 1;
 
+                int dateCol1 = -1, dateCol2 = -1;
+                for (int col = 1; col <= ws.LastColumnUsed().ColumnNumber(); col++)
+                {
+                    var txt = ws.Cell(10, col).GetString().Trim();
+                    if (DateTime.TryParse(txt, out _))
+                    {
+                        if (dateCol1 < 0)
+                            dateCol1 = col;
+                        else
+                        {
+                            dateCol2 = col;
+                            break;
+                        }
+                    }
+                }
+
                 if (csvRecs.ContainsKey(cleanKey) && csvRecs[cleanKey].Flag == 2)
                 {
                     val = ParseCell(ws.Cell(row, substitCol2).GetString());
@@ -64,7 +80,18 @@ namespace mersid
                     flag = 3;
                 }
 
-                dict[cleanKey] = new XlsRecord(origKey, val, marker, flag);
+
+                var d1 = ws.Cell(row, dateCol1).GetString().Trim();
+                var d2 = ws.Cell(row, dateCol2).GetString().Trim();
+
+                if (!dict.ContainsKey(cleanKey))
+                {
+                    dict[cleanKey] = new XlsRecord(origKey, val, d2, marker, flag);
+                }
+                else if (marker == "UN0")
+                {
+                    dict[cleanKey] = new XlsRecord(origKey, val, d2, marker, flag);
+                }
             }
 
             return dict;

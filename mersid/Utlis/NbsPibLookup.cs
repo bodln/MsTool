@@ -6,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace mersid
+namespace mersid.Utlis
 {
     public static class NbsPibLookup
     {
@@ -70,16 +70,16 @@ namespace mersid
                     Debug.WriteLine("[DEBUG] No nazivULinku input found in response.");
                     return "";
                 }
-                catch (HttpRequestException ex) when (ex.InnerException is System.IO.IOException)
+                catch (HttpRequestException ex) when (ex.InnerException is IOException)
                 {
                     Debug.WriteLine($"[WARN] Network error on attempt {attempt}: {ex.Message}");
                     // exponential backoff: 500ms, 1000ms, 2000ms
-                    await Task.Delay(500 * (1 << (attempt - 1)));
+                    await Task.Delay(500 * (1 << attempt - 1));
                 }
                 catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
                 {
                     Debug.WriteLine($"[WARN] Timeout on attempt {attempt}: {ex.Message}");
-                    await Task.Delay(500 * (1 << (attempt - 1)));
+                    await Task.Delay(500 * (1 << attempt - 1));
                 }
                 catch (Exception ex)
                 {
