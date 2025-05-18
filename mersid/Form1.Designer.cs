@@ -33,6 +33,8 @@
             label1 = new Label();
             label2 = new Label();
             button3 = new Button();
+            checkBox1 = new CheckBox();
+            AssumptionsCB = new CheckBox();
             SuspendLayout();
             // 
             // button1
@@ -81,11 +83,33 @@
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
+            // checkBox1
+            // 
+            checkBox1.AutoSize = true;
+            checkBox1.Location = new Point(331, 111);
+            checkBox1.Name = "checkBox1";
+            checkBox1.Size = new Size(81, 19);
+            checkBox1.TabIndex = 7;
+            checkBox1.Text = "Sve greske";
+            checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // AssumptionsCB
+            // 
+            AssumptionsCB.AutoSize = true;
+            AssumptionsCB.Location = new Point(331, 153);
+            AssumptionsCB.Name = "AssumptionsCB";
+            AssumptionsCB.Size = new Size(131, 19);
+            AssumptionsCB.TabIndex = 8;
+            AssumptionsCB.Text = "Prikazi pretpostavke";
+            AssumptionsCB.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(AssumptionsCB);
+            Controls.Add(checkBox1);
             Controls.Add(button3);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -104,5 +128,7 @@
         private Label label1;
         private Label label2;
         private Button button3;
+        private CheckBox checkBox1;
+        private CheckBox AssumptionsCB;
     }
 }

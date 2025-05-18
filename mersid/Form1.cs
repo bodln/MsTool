@@ -1,17 +1,12 @@
-﻿using ClosedXML.Excel;
-using ExcelDataReader;
-//using OpenQA.Selenium;
+﻿//using OpenQA.Selenium;
 //using OpenQA.Selenium.Chrome;
 //using OpenQA.Selenium.Support.UI;
+using mersid.Models;
+using mersid.Utlis;
 using System.Data;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Mail;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
-using mersid.Models;
-using mersid;
 
 
 namespace mersid
@@ -56,6 +51,19 @@ namespace mersid
         {
             //_driver?.Quit();
             //_driver?.Dispose();
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(xlsPath) && File.Exists(xlsPath))
+                {
+                    File.Delete(xlsPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška pri brisanju privremenog fajla: {ex.Message}");
+            }
+
             base.OnFormClosing(e);
         }
 
@@ -79,7 +87,7 @@ namespace mersid
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private async void button3_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(xlsPath) || string.IsNullOrEmpty(csvPath))
             {
@@ -113,27 +121,86 @@ namespace mersid
                     double cSum = csv.SumValue;
                     string xOrig = xls?.OriginalKey ?? "";
 
-                    if (xls == null || !ValuesEqual(xVal, cSum))
+                    bool equal = Math.Abs(xVal - cSum) <= 5.0;
+                    bool doubleTake = false;
+
+                    if (!equal)
+                    {
+                        var matchingKey = xlsRecs
+                           .Where(kvp =>
+                           {
+                               bool valueMatch = Math.Abs(kvp.Value.Value - cSum) <= 5.0;
+
+                               if (!valueMatch)
+                                   return false;
+
+                               if (!DateTime.TryParseExact(kvp.Value.Date, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var xlsDate))
+                                   return false;
+
+                               var cleanCsvDate = csv.Date1.TrimEnd('.');
+
+                               if (!DateTime.TryParseExact(cleanCsvDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var csvDate))
+                                   return false;
+
+                               return xlsDate.Date == csvDate.Date;
+                           })
+                           .OrderByDescending(kvp => kvp.Value.Marker == "UN0")
+                           .Select(kvp => kvp.Key)
+                           .FirstOrDefault();
+
+                        if (matchingKey != null)
+                        {
+                            doubleTake = true;
+                            xls = xlsRecs[matchingKey];
+                            xOrig = xls.OriginalKey;
+                            xVal = xls.Value;
+                        }
+                    }
+
+                    if (xls == null || !equal)
                     {
                         diffs.Add(new DiffRecord
                         {
                             Position = csv.Position,
-                            Marker = xls?.Marker ?? "Nema",
-                            OriginalKey = xOrig,
+                            XlsMarker = xls?.Marker ?? "Nema",
+                            XlsOriginalKey = xOrig ?? "Nema",
                             XlsValue = xVal,
                             CsvSumValue = cSum,
                             CsvOriginalKey = csv.OriginalKey,
                             Pib = csv.Pib,
                             CsvDate1 = csv.Date1,
-                            CsvDate2 = csv.Date2
+                            CsvDate2 = csv.Date2,
+                            CompanyName = "",
+                            DoubleTake = doubleTake
                         });
                     }
                 }
 
-                SaveDialog.ShowSaveDialog(diffs);
+                foreach (var diff in diffs)
+                {
+                    if (string.IsNullOrWhiteSpace(diff.Pib))
+                    {
+                        diff.CompanyName = "";
+                        continue;
+                    }
 
-                if (File.Exists(xlsPath))
-                    File.Delete(xlsPath);
+                    // 1) try in‑memory/SQLite cache first
+                    var name = PibStore.Instance.Lookup(diff.Pib);
+
+                    if (name == null)
+                    {
+                        name = await NbsPibLookup.LookupNameAsync(diff.Pib) ?? "";
+
+                        PibStore.Instance.AddOrUpdate(diff.Pib, name);
+                    }
+
+                    diff.CompanyName = name;
+                }
+
+                SaveDialog.ShowSaveDialog(diffs, checkBox1.Checked, AssumptionsCB.Checked);
+
+                //if (File.Exists(xlsPath))
+                //    File.Delete(xlsPath);
             }
             catch (Exception ex)
             {

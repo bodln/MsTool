@@ -1,3 +1,5 @@
+using mersid.Utlis;
+
 namespace mersid
 {
     internal static class Program
@@ -11,6 +13,7 @@ namespace mersid
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            var _ = PibStore.Instance;
             Application.Run(new Form1());
         }
     }
