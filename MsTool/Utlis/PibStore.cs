@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 
-namespace mersid.Utlis
+namespace MsTool.Utlis
 {
     /// <summary>
     /// Singleton-backed store for PIB→Company‑Name lookups,

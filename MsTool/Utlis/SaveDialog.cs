@@ -1,7 +1,7 @@
 ﻿using ClosedXML.Excel;
-using mersid.Models;
+using MsTool.Models;
 
-namespace mersid.Utlis
+namespace MsTool.Utlis
 {
     public static class SaveDialog
     {

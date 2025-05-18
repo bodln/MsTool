@@ -6,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace mersid.Utlis
+namespace MsTool.Utlis
 {
     public static class NbsPibLookup
     {

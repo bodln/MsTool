@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace mersid.Models
+namespace MsTool.Models
 {
     public record XlsRecord(string OriginalKey, double Value, string Date, string Marker, int Flag);
     public record CsvRecord(string OriginalKey, double SumValue, string Date1, string Date2, string Position, string Pib, int Flag);

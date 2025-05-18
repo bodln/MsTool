@@ -1,4 +1,4 @@
-﻿namespace mersid
+﻿namespace MsTool
 {
     partial class Form1
     {
@@ -116,7 +116,7 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Name = "Form1";
-            Text = "Form1";
+            Text = "MsTool";
             ResumeLayout(false);
             PerformLayout();
         }

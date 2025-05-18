@@ -1,6 +1,6 @@
-using mersid.Utlis;
+using MsTool.Utlis;
 
-namespace mersid
+namespace MsTool
 {
     internal static class Program
     {
