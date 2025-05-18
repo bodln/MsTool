@@ -10,7 +10,6 @@ namespace MsTool.Utlis
 {
     public static class NbsPibLookup
     {
-        // Single handler, but we disable auto-redirect (we parse the POST directly).
         private static readonly HttpClientHandler _handler = new HttpClientHandler
         {
             AllowAutoRedirect = false,
@@ -24,7 +23,7 @@ namespace MsTool.Utlis
 
         static NbsPibLookup()
         {
-            // A realistic User-Agent so the server treats us like a browser:
+            // A realistic User-Agent so the server treats us like a browser
             _http.DefaultRequestHeaders.UserAgent.ParseAdd(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                 "AppleWebKit/537.36 (KHTML, like Gecko) " +
@@ -43,7 +42,7 @@ namespace MsTool.Utlis
             var form = new Dictionary<string, string>
             {
                 ["pib"] = pib,
-                ["Submit"] = "Pretraži"
+                ["Submit"] = "Pretraži" // Identificator from the URLs HTML
             };
 
             for (int attempt = 1; attempt <= 3; attempt++)

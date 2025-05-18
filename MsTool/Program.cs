@@ -13,6 +13,7 @@ namespace MsTool
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            // Touch Sqlite db fo initialization
             var _ = PibStore.Instance;
             Application.Run(new Form1());
         }

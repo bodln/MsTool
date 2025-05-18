@@ -17,7 +17,6 @@ namespace MsTool
         private string csvPath;
         private List<DiffRecord> diffs;
 
-        // Selenium driver fields
         //private readonly ChromeDriverService _driverService;
         //private readonly ChromeOptions _chromeOptions;
         //private readonly IWebDriver _driver;
@@ -31,7 +30,7 @@ namespace MsTool
             //AllocConsole();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            // ─── SETUP SELENIUM ONCE ───────────────────────────────────────────
+            //// Setup selenium once and use it for all searches
             //_driverService = ChromeDriverService.CreateDefaultService();
             //_driverService.HideCommandPromptWindow = true;
             //_driverService.SuppressInitialDiagnosticInformation = true;
@@ -42,6 +41,7 @@ namespace MsTool
             //_chromeOptions.AddArgument("--disable-extensions");
             //_chromeOptions.AddArgument("--disable-popup-blocking");
             //_chromeOptions.AddArgument("--log-level=3");
+            //// Does not wait for images and such to load 
             //_chromeOptions.PageLoadStrategy = PageLoadStrategy.Eager;
 
             //_driver = new ChromeDriver(_driverService, _chromeOptions);
@@ -100,15 +100,15 @@ namespace MsTool
                 var csvRecs = FileManipulator.LoadCsv(csvPath);
                 var xlsRecs = FileManipulator.LoadXls(xlsPath, csvRecs);
 
-                foreach (var kvp in csvRecs)
-                {
-                    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-                }
+                //foreach (var kvp in csvRecs)
+                //{
+                //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+                //}
 
-                foreach (var kvp in xlsRecs)
-                {
-                    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-                }
+                //foreach (var kvp in xlsRecs)
+                //{
+                //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+                //}
 
                 diffs = new List<DiffRecord>();
 
@@ -122,7 +122,7 @@ namespace MsTool
                     string xOrig = xls?.OriginalKey ?? "";
 
                     bool equal = Math.Abs(xVal - cSum) <= 5.0;
-                    bool doubleTake = false;
+                    bool doubleTake = false; // Flag used to signal second round of searches was done, the one by value and date pair
 
                     if (!equal)
                     {
@@ -184,7 +184,6 @@ namespace MsTool
                         continue;
                     }
 
-                    // 1) try in‑memory/SQLite cache first
                     var name = PibStore.Instance.Lookup(diff.Pib);
 
                     if (name == null)
@@ -208,14 +207,11 @@ namespace MsTool
             }
         }
 
-        private bool ValuesEqual(double a, double b) =>
-            Math.Abs(a - b) <= 4.0;
-
         // Selenium <----------------------------------------------------------------------------------------------------------
         //private async Task<string> GetPIB(string pib)
         //{
         //    if (string.IsNullOrEmpty(pib))
-        //        return "";  // no PIB → blank
+        //        return "";
 
         //    string nazivFirme = "";
 

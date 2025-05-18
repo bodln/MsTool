@@ -162,6 +162,7 @@ namespace MsTool.Utlis
             MessageBox.Show("Uspešno sačuvano:\n" + path);
         }
 
+        // Making sure there is no identical name conflicts
         private static string GetUniquePath(string basePath)
         {
             var dir = Path.GetDirectoryName(basePath);

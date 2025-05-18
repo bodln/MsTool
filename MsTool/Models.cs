@@ -6,8 +6,22 @@ using System.Threading.Tasks;
 
 namespace MsTool.Models
 {
-    public record XlsRecord(string OriginalKey, double Value, string Date, string Marker, int Flag);
-    public record CsvRecord(string OriginalKey, double SumValue, string Date1, string Date2, string Position, string Pib, int Flag);
+    public record XlsRecord(
+        string OriginalKey, 
+        double Value, 
+        string Date, // DATDOK
+        string Marker, // VR
+        int Flag // 1 - 
+    );
+    public record CsvRecord(
+        string OriginalKey, 
+        double SumValue, 
+        string Date1, // Datum PDV obaveze/evidentiranja
+        string Date2, // Datum obrade
+        string Position, 
+        string Pib, 
+        int Flag
+    );
     public record DiffRecord
     {
         public string XlsMarker { get; set; }
