@@ -1,7 +1,6 @@
 ﻿using ClosedXML.Excel;
 using ExcelDataReader;
-using System;
-using System.Collections.Generic;
+using MsTool.Models;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -19,32 +18,32 @@ namespace MsTool.Utlis
             var ws = wb.Worksheet(1);
             var dict = new Dictionary<string, XlsRecord>();
 
+            // Identify populated columns in rows 10 and 11
+            var populatedColsRow10 = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
+                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(10, col).GetString()))
+                .ToArray();
+
+            var populatedColsRow11 = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
+                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(11, col).GetString()))
+                .ToArray();
+
             int ifraCol = -1, // Column number of the bill number
                 valueCol = -1,  // -||- of the main relevant value (Flag 1)
                 substitCol2 = -1, // -||- of the values relevant to Flag 2
                 substitCol3 = -1; // -||- of the values relevant to Flag 3
-            for (int col = 1; col <= ws.LastColumnUsed().ColumnNumber(); col++)
-            {
-                string r9 = Normalize(ws.Cell(9, col).GetString());
-                string r8 = Normalize(ws.Cell(8, col).GetString());
-                if (ifraCol == -1 && (r9.Contains("IFRA") || r9.Contains("\u008aIFRA")))
-                    ifraCol = col;
-                if (valueCol == -1 && r8.Contains("VALUTA")) // Relevant to Flag 1
-                    valueCol = col;
-                if (substitCol2 == -1 && r8.Contains("OSNOV OPSTA")) // Flag 2
-                    substitCol2 = col;
-                if (substitCol3 == -1 && r8.Contains("OSNOV POS.")) // Flag 3
-                    substitCol3 = col;
-            }
-            if (ifraCol < 0 || valueCol < 0)
-                throw new Exception("Nije moguće pronaći kolone");
+
+            ifraCol = populatedColsRow11[3];
+            valueCol = populatedColsRow10[6];
+
+            int dateCol1 = populatedColsRow10[3], // DATPRI
+                dateCol2 = populatedColsRow10[4]; // DATDOK
 
             for (int row = 10; ; row += 2) // Data begins on row 10
             {
-                var rawMarker = ws.Cell(row, "B").GetString();
+                var rawMarker = ws.Cell(row, populatedColsRow10[1]).GetString();
                 if (string.IsNullOrWhiteSpace(rawMarker))
-                    rawMarker = ws.Cell(++row, "B").GetString();
-                if (string.IsNullOrWhiteSpace(ws.Cell(row, "A").GetString()))
+                    rawMarker = ws.Cell(++row, populatedColsRow10[1]).GetString();
+                if (string.IsNullOrWhiteSpace(ws.Cell(row, populatedColsRow10[0]).GetString()))
                     break;
 
                 var marker = rawMarker.Trim().ToUpper(); // ex. UN0
@@ -76,11 +75,19 @@ namespace MsTool.Utlis
 
                 if (csvRecs.ContainsKey(cleanKey) && csvRecs[cleanKey].Flag == 2)
                 {
+                    var populatedColsRowX = Enumerable.Range(valueCol, ws.LastColumnUsed().ColumnNumber())
+                        .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(row, col).GetString()))
+                        .ToArray();
+                    substitCol2 = populatedColsRowX[0]; // Column number of OSNOV OPSTA values
                     val = ParseCell(ws.Cell(row, substitCol2).GetString());
                     flag = 2;
                 }
                 else if (csvRecs.ContainsKey(cleanKey) && csvRecs[cleanKey].Flag == 3)
                 {
+                    var populatedColsRowX = Enumerable.Range(valueCol, ws.LastColumnUsed().ColumnNumber())
+                        .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(row, col).GetString()))
+                        .ToArray(); // Assumes column where value for substitCol 3 would've been is empty
+                    substitCol3 = populatedColsRowX[0]; // Column number of OSNOV POS. values
                     val = ParseCell(ws.Cell(row, substitCol3).GetString());
                     flag = 3;
                 }
