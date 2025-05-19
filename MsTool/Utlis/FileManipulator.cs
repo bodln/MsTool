@@ -5,8 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using MsTool.Models;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Globalization;
 
 namespace MsTool.Utlis
 {
@@ -113,25 +114,38 @@ namespace MsTool.Utlis
         public static Dictionary<string, CsvRecord> LoadCsv(string path)
         {
             var dict = new Dictionary<string, CsvRecord>();
-            var lines = File.ReadAllLines(path);
-            foreach (var line in lines.Skip(1))
-            {
-                var parts = line.Split(',');
-                if (parts.Length < 12) continue;
 
-                string origKey = parts[1];
+            // detect delimiter by comparing semicolons vs commas on the header line
+            var firstLine = File.ReadLines(path).First();
+            var delim = firstLine.Count(c => c == ';') > firstLine.Count(c => c == ',') ? ';' : ',';
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = delim.ToString(),
+                HasHeaderRecord = true
+            };
+
+            using var reader = new StreamReader(path);
+            using var csv = new CsvReader(reader, config);
+
+            csv.Read();
+            csv.ReadHeader();
+
+            while (csv.Read())
+            {
+                string origKey = csv.GetField("Broj dokumenta");
                 string cleanKey = Regex.Replace(origKey, @"[\/\-\s]", "").ToUpperInvariant();
 
-                double v1 = ParseCell(parts[9]); // PDV 10%
-                double v2 = ParseCell(parts[11]); // PDV 10%
-                double v3 = ParseCell(parts[8]); // Osnovica 20%
-                double v4 = ParseCell(parts[10]); // Osnovica 10%
+                double v1 = ParseCell(csv.GetField("PDV 20%")); // PDV 20%
+                double v2 = ParseCell(csv.GetField("PDV 10%")); // PDV 10%
+                double v3 = ParseCell(csv.GetField("Osnovica 20%")); // Osnovica 20%
+                double v4 = ParseCell(csv.GetField("Osnovica 10%")); // Osnovica 10%
                 double sum = v1 + v2 + v3 + v4;
 
-                string date1 = parts[6]; // Datum PDV obaveze/evidentiranja
-                string date2 = parts[7]; // Datum obrade
-                string position = parts[0];
-                string pib = parts[5];
+                string date1 = csv.GetField("Datum PDV obaveze/evidentiranja"); // Datum PDV obaveze/evidentiranja
+                string date2 = csv.GetField("Datum obrade"); // Datum obrade
+                string position = csv.GetField(0);
+                string pib = csv.GetField("PIB prodavca");
 
                 if (v3 != 0 && v1 == 0)
                 {
@@ -148,6 +162,7 @@ namespace MsTool.Utlis
                     dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 1);
                 }
             }
+
             return dict;
         }
 
