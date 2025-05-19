@@ -89,7 +89,7 @@ namespace MsTool.Utlis
 
             if (showAssumptions)
             {
-                ws.Cell("A1").Value = "Pretpostavka";
+                ws.Cell("A1").Value = "Prp.";
                 ws.Cell("B1").Value = "Pozicija";
                 ws.Cell("C1").Value = "Oznaka";
                 ws.Cell("D1").Value = "Racun kod mene";

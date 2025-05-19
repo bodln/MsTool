@@ -2,8 +2,6 @@
 using ExcelDataReader;
 using MsTool.Models;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -48,31 +46,11 @@ namespace MsTool.Utlis
                     break;
 
                 var marker = rawMarker.Trim().ToUpper(); // ex. UN0
-                //if (checkBox1.Checked && marker != "UN0")
-                //    continue;
 
                 string origKey = ws.Cell(row + 1, ifraCol).GetString(); // Original bill number
                 string cleanKey = Regex.Replace(origKey, @"[\/\-\s]", "").ToUpperInvariant();
                 double val = ParseCell(ws.Cell(row, valueCol).GetString());
                 int flag = 1;
-
-                int dateCol1 = -1, // DATPRI
-                    dateCol2 = -1; // DATDOK
-
-                for (int col = 1; col <= ws.LastColumnUsed().ColumnNumber(); col++)
-                {
-                    var txt = ws.Cell(10, col).GetString().Trim();
-                    if (DateTime.TryParse(txt, out _))
-                    {
-                        if (dateCol1 < 0)
-                            dateCol1 = col;
-                        else
-                        {
-                            dateCol2 = col;
-                            break;
-                        }
-                    }
-                }
 
                 if (csvRecs.ContainsKey(cleanKey) && csvRecs[cleanKey].Flag == 2)
                 {

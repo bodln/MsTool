@@ -116,7 +116,7 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Name = "Form1";
-            Text = "MsTool";
+            Text = "MsTool v1.5.2";
             ResumeLayout(false);
             PerformLayout();
         }

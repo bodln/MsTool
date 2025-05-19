@@ -190,7 +190,7 @@ namespace MsTool
                     {
                         name = await NbsPibLookup.LookupNameAsync(diff.Pib) ?? "";
 
-                        PibStore.Instance.AddOrUpdate(diff.Pib, name);
+                        PibStore.Instance.AddOrUpdate(diff.Pib, name ?? "");
                     }
 
                     diff.CompanyName = name;
@@ -198,12 +198,15 @@ namespace MsTool
 
                 SaveDialog.ShowSaveDialog(diffs, checkBox1.Checked, AssumptionsCB.Checked);
 
+                //IReadOnlyDictionary<string, string> db = PibStore.Instance.GetAll();
+                //db.ToList().ForEach(kvp => Console.WriteLine($"{kvp.Key} -> {kvp.Value}"));
+
                 //if (File.Exists(xlsPath))
                 //    File.Delete(xlsPath);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Greška: " + ex.Message);
+                MessageBox.Show("Greška Form1.cs: " + ex.Message);
             }
         }
 
