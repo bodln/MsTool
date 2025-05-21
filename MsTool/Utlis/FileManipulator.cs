@@ -1,16 +1,75 @@
 ﻿using ClosedXML.Excel;
+using CsvHelper;
+using CsvHelper.Configuration;
 using ExcelDataReader;
 using MsTool.Models;
 using System.Data;
-using System.Text.RegularExpressions;
-using CsvHelper;
-using CsvHelper.Configuration;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace MsTool.Utlis
 {
     public static class FileManipulator
     {
+        public static Dictionary<string, XlsAnalyticsRecord> LoadXlsAnalytics(string path)
+        {
+            var wb = new XLWorkbook(path);
+            var ws = wb.Worksheet(1);
+            var dict = new Dictionary<string, XlsAnalyticsRecord>();
+
+            int lastRow = ws.LastRowUsed().RowNumber();
+            int lastCol = ws.LastColumnUsed().ColumnNumber();
+
+            for (int row = 18; row < lastRow; row++)
+            {
+                var lastCellValue = ws.Cell(row, lastCol).GetString().Trim();
+                if (string.Equals(lastCellValue, "P.S.", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var colD = ws.Cell(row, "D").GetString().Trim();
+                if (string.Equals(colD, "SRAVNJENJE", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string origKey = colD;
+                string date = ws.Cell(row, "B").GetString().Trim();
+                string account = ws.Cell(row, "K").GetString().Trim();
+
+                double valueMain = int.TryParse(
+                    ws.Cell(row, "F")
+                      .GetString()
+                      .Replace(" ", "")
+                      .Replace(".", ",")
+                      .Split(new[] { '.', ',' }, StringSplitOptions.None)[0],
+                    out var wholeMain
+                )
+                ? wholeMain
+                : 0;
+
+                double valueRef = int.TryParse(
+                    ws.Cell(row, "H")
+                      .GetString()
+                      .Replace(" ", "")
+                      .Split(new[] { '.', ',' }, StringSplitOptions.None)[0],
+                    out var wholeRef
+                )
+                ? wholeRef
+                : 0;
+
+                string cleanKey = Regex.Replace(origKey, @"[^A-Za-z0-9]", "");
+
+                dict[cleanKey] = new XlsAnalyticsRecord(
+                    OriginalKey: origKey,
+                    ValueMain: valueMain,
+                    ValueRef: valueRef,
+                    Date: date,
+                    Account: account,
+                    Flag: false
+                );
+            }
+
+            return dict;
+        }
+
         public static Dictionary<string, XlsRecord> LoadXls(string path, Dictionary<string, CsvRecord> csvRecs)
         {
             var wb = new XLWorkbook(path);

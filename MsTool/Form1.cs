@@ -15,7 +15,11 @@ namespace MsTool
     {
         private string xlsPath;
         private string csvPath;
+        private string xlsMainPath; // Putanje fajlova za analiticke kartice
+        private string xlsRefPath;
         private List<DiffRecord> diffs;
+
+        bool analytics = false;
 
         //private readonly ChromeDriverService _driverService;
         //private readonly ChromeOptions _chromeOptions;
@@ -72,141 +76,75 @@ namespace MsTool
             var ofd = new OpenFileDialog { Filter = "Excel 97-2003 Workbook|*.xls" };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                xlsPath = FileManipulator.ConvertXlsToXlsx(ofd.FileName);
-                label1.Text = Path.GetFileName(xlsPath);
+                if (!analytics)
+                {
+                    xlsPath = FileManipulator.ConvertXlsToXlsx(ofd.FileName);
+                    label1.Text = Path.GetFileName(xlsPath);
+                }
+                else
+                {
+                    xlsRefPath = FileManipulator.ConvertXlsToXlsx(ofd.FileName);
+                    label1.Text = Path.GetFileName(xlsRefPath);
+
+                    Console.WriteLine("Analytics mode");
+                }
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var ofd = new OpenFileDialog { Filter = "CSV File|*.csv" };
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (!analytics)
             {
-                csvPath = ofd.FileName;
-                label2.Text = Path.GetFileName(csvPath);
+                var ofd = new OpenFileDialog { Filter = "CSV File|*.csv" };
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    csvPath = ofd.FileName;
+                    label2.Text = Path.GetFileName(csvPath);
+                }
+            }
+            else
+            {
+                var ofd = new OpenFileDialog { Filter = "Excel 97-2003 Workbook|*.xls" };
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    xlsMainPath = FileManipulator.ConvertXlsToXlsx(ofd.FileName);
+                    label2.Text = Path.GetFileName(xlsMainPath);
+                }
+
+                Console.WriteLine("Analytics mode");
             }
         }
 
         private async void button3_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(xlsPath) || string.IsNullOrEmpty(csvPath))
+            if (!analytics)
             {
-                MessageBox.Show("Molim vas, prvo izaberite oba fajla.");
-                return;
+                BookOfBillsFunctions.Proceed(xlsPath, csvPath, checkBox1.Checked, AssumptionsCB.Checked);
             }
-
-            try
+            else
             {
-                var csvRecs = FileManipulator.LoadCsv(csvPath);
-                var xlsRecs = FileManipulator.LoadXls(xlsPath, csvRecs);
+                AnalyticsFunctions.Proceed(xlsMainPath, xlsRefPath, AssumptionsCB.Checked);
 
-                //foreach (var kvp in csvRecs)
-                //{
-                //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-                //}
-
-                //foreach (var kvp in xlsRecs)
-                //{
-                //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-                //}
-
-                diffs = new List<DiffRecord>();
-
-                foreach (var key in csvRecs.Keys)
-                {
-                    var csv = csvRecs[key];
-                    xlsRecs.TryGetValue(key, out var xls);
-
-                    double xVal = xls?.Value ?? 0;
-                    double cSum = csv.SumValue;
-                    string xOrig = xls?.OriginalKey ?? "";
-
-                    bool equal = Math.Abs(xVal - cSum) <= 5.0;
-                    bool doubleTake = false; // Flag used to signal second round of searches was done, the one by value and date pair
-
-                    if (!equal)
-                    {
-                        var matchingKey = xlsRecs
-                           .Where(kvp =>
-                           {
-                               bool valueMatch = Math.Abs(kvp.Value.Value - cSum) <= 5.0;
-
-                               if (!valueMatch)
-                                   return false;
-
-                               if (!DateTime.TryParseExact(kvp.Value.Date, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var xlsDate))
-                                   return false;
-
-                               var cleanCsvDate = csv.Date1.TrimEnd('.');
-
-                               if (!DateTime.TryParseExact(cleanCsvDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var csvDate))
-                                   return false;
-
-                               return xlsDate.Date == csvDate.Date;
-                           })
-                           .OrderByDescending(kvp => kvp.Value.Marker == "UN0")
-                           .Select(kvp => kvp.Key)
-                           .FirstOrDefault();
-
-                        if (matchingKey != null)
-                        {
-                            doubleTake = true;
-                            xls = xlsRecs[matchingKey];
-                            xOrig = xls.OriginalKey;
-                            xVal = xls.Value;
-                        }
-                    }
-
-                    if (xls == null || !equal)
-                    {
-                        diffs.Add(new DiffRecord
-                        {
-                            Position = csv.Position,
-                            XlsMarker = xls?.Marker ?? "Nema",
-                            XlsOriginalKey = xOrig ?? "Nema",
-                            XlsValue = xVal,
-                            CsvSumValue = cSum,
-                            CsvOriginalKey = csv.OriginalKey,
-                            Pib = csv.Pib,
-                            CsvDate1 = csv.Date1,
-                            CsvDate2 = csv.Date2,
-                            CompanyName = "",
-                            DoubleTake = doubleTake
-                        });
-                    }
-                }
-
-                foreach (var diff in diffs)
-                {
-                    if (string.IsNullOrWhiteSpace(diff.Pib))
-                    {
-                        diff.CompanyName = "";
-                        continue;
-                    }
-
-                    var name = PibStore.Instance.Lookup(diff.Pib);
-
-                    if (name == null)
-                    {
-                        name = await NbsPibLookup.LookupNameAsync(diff.Pib) ?? "";
-
-                        PibStore.Instance.AddOrUpdate(diff.Pib, name ?? "");
-                    }
-
-                    diff.CompanyName = name;
-                }
-
-                SaveDialog.ShowSaveDialog(diffs, checkBox1.Checked, AssumptionsCB.Checked);
-
-                //IReadOnlyDictionary<string, string> db = PibStore.Instance.GetAll();
-                //db.ToList().ForEach(kvp => Console.WriteLine($"{kvp.Key} -> {kvp.Value}"));
-
-                //if (File.Exists(xlsPath))
-                //    File.Delete(xlsPath);
+                Console.WriteLine("Analytics functions here");
             }
-            catch (Exception ex)
+        }
+
+        private void AnalyticsCB_CheckedChanged(object sender, EventArgs e)
+        {
+            analytics = !analytics;
+            if (analytics)
             {
-                MessageBox.Show("Greška Form1.cs: " + ex.Message);
+                button1.Text = "Referentni fajl";
+                button2.Text = "Moj fajl";
+
+                checkBox1.Enabled = false;
+            }
+            else
+            {
+                button1.Text = "Moj fajl";
+                button2.Text = "Fajl poreske uprave";
+
+                checkBox1.Enabled = true;
             }
         }
 

@@ -35,6 +35,7 @@
             button3 = new Button();
             checkBox1 = new CheckBox();
             AssumptionsCB = new CheckBox();
+            AnalyticsCB = new CheckBox();
             SuspendLayout();
             // 
             // button1
@@ -43,7 +44,7 @@
             button1.Name = "button1";
             button1.Size = new Size(178, 101);
             button1.TabIndex = 0;
-            button1.Text = "Pronadji tvoj fajl";
+            button1.Text = "Moj fajl";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
@@ -86,7 +87,7 @@
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.Location = new Point(331, 111);
+            checkBox1.Location = new Point(333, 128);
             checkBox1.Name = "checkBox1";
             checkBox1.Size = new Size(81, 19);
             checkBox1.TabIndex = 7;
@@ -96,18 +97,31 @@
             // AssumptionsCB
             // 
             AssumptionsCB.AutoSize = true;
-            AssumptionsCB.Location = new Point(331, 153);
+            AssumptionsCB.Location = new Point(333, 170);
             AssumptionsCB.Name = "AssumptionsCB";
             AssumptionsCB.Size = new Size(131, 19);
             AssumptionsCB.TabIndex = 8;
             AssumptionsCB.Text = "Prikazi pretpostavke";
             AssumptionsCB.UseVisualStyleBackColor = true;
             // 
+            // AnalyticsCB
+            // 
+            AnalyticsCB.AutoSize = true;
+            AnalyticsCB.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            AnalyticsCB.Location = new Point(333, 87);
+            AnalyticsCB.Name = "AnalyticsCB";
+            AnalyticsCB.Size = new Size(123, 19);
+            AnalyticsCB.TabIndex = 9;
+            AnalyticsCB.Text = "Analiticke kartice";
+            AnalyticsCB.UseVisualStyleBackColor = true;
+            AnalyticsCB.CheckedChanged += AnalyticsCB_CheckedChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(AnalyticsCB);
             Controls.Add(AssumptionsCB);
             Controls.Add(checkBox1);
             Controls.Add(button3);
@@ -116,7 +130,7 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Name = "Form1";
-            Text = "MsTool v1.69";
+            Text = "MsTool v2.0";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -130,5 +144,6 @@
         private Button button3;
         private CheckBox checkBox1;
         private CheckBox AssumptionsCB;
+        private CheckBox AnalyticsCB;
     }
 }

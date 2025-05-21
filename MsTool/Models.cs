@@ -11,8 +11,9 @@ namespace MsTool.Models
         double Value, 
         string Date, // DATDOK
         string Marker, // VR
-        int Flag // 1 - 
+        int Flag // 1/2/3
     );
+
     public record CsvRecord(
         string OriginalKey, 
         double SumValue, 
@@ -22,6 +23,7 @@ namespace MsTool.Models
         string Pib, 
         int Flag
     );
+
     public record DiffRecord
     {
         public string XlsMarker { get; set; }
@@ -35,5 +37,27 @@ namespace MsTool.Models
         public string Pib { get; set; }
         public string CompanyName { get; set; }
         public bool DoubleTake { get; set; }
+    }
+
+    public record XlsAnalyticsRecord(
+        string OriginalKey,
+        double ValueMain, // DUGUJE
+        double ValueRef, // POTRAZUJE
+        string Date, // DATUM
+        string Account, // NALOG
+        bool Flag 
+    );
+
+    public record DiffAnalyticsRecord
+    {
+        public string OriginalMainKey { get; set; }
+        public string OriginalRefKey { get; set; }
+        public double ValueMain { get; set; }
+        public double ValueRef { get; set; }
+        public string DateMain { get; set; }
+        public string DateRef { get; set; }
+        public string AccountMain { get; set; }
+        public string AccountRef { get; set; }
+        public bool DoubleTake { get; set; } = false;
     }
 }
