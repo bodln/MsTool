@@ -12,7 +12,16 @@ namespace MsTool.Utlis
     {
         public static void ShowSaveDialog(List<DiffAnalyticsRecord> diffs, bool showAssumptions)
         {
-            int count = diffs.Count(d => d.OriginalRefKey == "Nema");
+            int count = 0;
+
+            if (!showAssumptions)
+            {
+                count = diffs.Count();
+            }
+            else
+            {
+                count = diffs.Where(d => d.DoubleTake == false).Count();
+            }
 
             var dlg = new Form
             {

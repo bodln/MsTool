@@ -230,9 +230,11 @@ namespace MsTool.Utlis
 
             var normalized = s
                 .Replace(" ", "")
-                .Replace(".", ",");
+                .Replace(",", ".");
 
-            return double.TryParse(normalized, out var result) ? result : 0;
+            return double.TryParse(normalized, NumberStyles.Any, CultureInfo.InvariantCulture, out var result)
+                ? result
+                : 0;
         }
 
         private static string Normalize(string input) =>
