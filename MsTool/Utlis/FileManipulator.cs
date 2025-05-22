@@ -34,26 +34,9 @@ namespace MsTool.Utlis
                 string date = ws.Cell(row, "B").GetString().Trim();
                 string account = ws.Cell(row, "K").GetString().Trim();
 
-                double valueMain = int.TryParse(
-                    ws.Cell(row, "F")
-                      .GetString()
-                      .Replace(" ", "")
-                      .Replace(".", ",")
-                      .Split(new[] { '.', ',' }, StringSplitOptions.None)[0],
-                    out var wholeMain
-                )
-                ? wholeMain
-                : 0;
+                double valueMain = ParseCell(ws.Cell(row, "F").GetString());
 
-                double valueRef = int.TryParse(
-                    ws.Cell(row, "H")
-                      .GetString()
-                      .Replace(" ", "")
-                      .Split(new[] { '.', ',' }, StringSplitOptions.None)[0],
-                    out var wholeRef
-                )
-                ? wholeRef
-                : 0;
+                double valueRef = ParseCell(ws.Cell(row, "H").GetString());
 
                 string cleanKey = Regex.Replace(origKey, @"[^A-Za-z0-9]", "");
 
@@ -244,10 +227,12 @@ namespace MsTool.Utlis
         private static double ParseCell(string s)
         {
             if (string.IsNullOrWhiteSpace(s)) return 0;
-            var trimmed = s.Trim();
-            var parts = trimmed.Split(new[] { '.', ',' }, 2);
-            var match = Regex.Match(parts[0], @"-?\d+");
-            return match.Success && double.TryParse(match.Value, out var w) ? w : 0;
+
+            var normalized = s
+                .Replace(" ", "")
+                .Replace(".", ",");
+
+            return double.TryParse(normalized, out var result) ? result : 0;
         }
 
         private static string Normalize(string input) =>
