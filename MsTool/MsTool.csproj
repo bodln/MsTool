@@ -7,11 +7,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <StartupObject>MsTool.Program</StartupObject>
-    <ApplicationIcon>MsTool Icon.ico</ApplicationIcon>
+    <ApplicationIcon>MsTool 2.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="MsTool Icon.ico" />
+    <Content Include="MsTool 2.ico" />
   </ItemGroup>
 
   <ItemGroup>
