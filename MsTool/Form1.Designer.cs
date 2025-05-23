@@ -130,7 +130,7 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Name = "Form1";
-            Text = "MsTool v2.1.1";
+            Text = "MsTool v2.2";
             ResumeLayout(false);
             PerformLayout();
         }

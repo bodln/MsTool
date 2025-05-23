@@ -99,20 +99,23 @@ namespace MsTool.Utlis
             var wb = new XLWorkbook();
             var ws = wb.AddWorksheet("Razlike");
 
-            double sum = 0;
+            double sumMain = 0;
+            double sumRef = 0;
 
             if (showAssumptions)
             {
                 ws.Cell("A1").Value = "Prp.";
                 ws.Cell("B1").Value = "Datum";
                 ws.Cell("C1").Value = "Racun";
-                ws.Cell("D1").Value = "Vrednost";
+                ws.Cell("D1").Value = "Duguje";
+                ws.Cell("E1").Value = "Potrazuje";
             }
             else
             {
                 ws.Cell("A1").Value = "Datum";
                 ws.Cell("B1").Value = "Racun";
-                ws.Cell("C1").Value = "Vrednost";
+                ws.Cell("C1").Value = "Duguje";
+                ws.Cell("D1").Value = "Potrazuje";
             }
 
             int excelRow = 2;
@@ -124,7 +127,8 @@ namespace MsTool.Utlis
                     continue;
                 }
 
-                sum += diff.ValueMain;
+                sumMain += diff.ValueMain;
+                sumRef += diff.ValueRef;
 
                 if (showAssumptions)
                 {
@@ -132,12 +136,14 @@ namespace MsTool.Utlis
                     ws.Cell(excelRow, 2).Value = diff.DateMain;
                     ws.Cell(excelRow, 3).Value = diff.OriginalMainKey;
                     ws.Cell(excelRow, 4).Value = diff.ValueMain;
+                    ws.Cell(excelRow, 5).Value = diff.ValueRef;
                 }
                 else
                 {
                     ws.Cell(excelRow, 1).Value = diff.DateMain;
                     ws.Cell(excelRow, 2).Value = diff.OriginalMainKey;
                     ws.Cell(excelRow, 3).Value = diff.ValueMain;
+                    ws.Cell(excelRow, 4).Value = diff.ValueRef;
                 }
 
                 excelRow++;
@@ -145,13 +151,15 @@ namespace MsTool.Utlis
 
             if (showAssumptions)
             {
-                ws.Cell(++excelRow, 4).Value = sum;
-                ws.Cell(excelRow, 3).Value = "Svega:";
+                ws.Cell(++excelRow, 3).Value = "Svega:";
+                ws.Cell(excelRow, 4).Value = sumMain;
+                ws.Cell(excelRow, 5).Value = sumRef;
             }
             else
             {
-                ws.Cell(++excelRow, 3).Value = sum;
-                ws.Cell(excelRow, 2).Value = "Svega:";
+                ws.Cell(++excelRow, 2).Value = "Svega:";
+                ws.Cell(excelRow, 3).Value = sumMain;
+                ws.Cell(excelRow, 4).Value = sumRef;
             }
 
             ws.RangeUsed().SetAutoFilter();

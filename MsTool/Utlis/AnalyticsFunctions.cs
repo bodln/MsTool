@@ -23,7 +23,7 @@ namespace MsTool.Utlis
 
             try
             {
-                var xlsMainRecs = FileManipulator.LoadXlsAnalytics(xlsMainPath); // what csv was for BoB
+                var xlsMainRecs = FileManipulator.LoadXlsAnalytics(xlsMainPath); // What csv was for BoB
                 var xlsRefRecs = FileManipulator.LoadXlsAnalytics(xlsRefPath); 
 
                 List<DiffAnalyticsRecord> diffs = new List<DiffAnalyticsRecord>();
@@ -34,8 +34,19 @@ namespace MsTool.Utlis
                     xlsRefRecs.TryGetValue(key, out var xlsRef);
 
                     double refVal = xlsRef?.ValueRef ?? 0;
+                    double refValSecundum = xlsRef?.ValueMain ?? 0;
 
-                    bool equal = Math.Abs(refVal - xlsMain.ValueMain) <= 5.0;
+                    bool equal = true;
+
+                    if (xlsMain.ValueMain == 0 && xlsMain.ValueRef != 0) // Enables cross comparation both ways
+                    {
+                        equal = Math.Abs(refValSecundum - xlsMain.ValueRef) <= 5.0;
+                    }
+                    else
+                    {
+                        equal = Math.Abs(refVal - xlsMain.ValueMain) <= 5.0;
+                    }
+
                     bool doubleTake = false;
 
                     if (!equal)
@@ -43,7 +54,16 @@ namespace MsTool.Utlis
                         var matchingKey = xlsRefRecs
                             .Where(kvp =>
                             {
-                                bool valueMatch = Math.Abs(kvp.Value.ValueRef - xlsMain.ValueMain) <= 5.0;
+                                bool valueMatch = false;
+
+                                if (kvp.Value.ValueMain != 0 && kvp.Value.ValueRef == 0) // Enables cross comparation both ways
+                                {
+                                    valueMatch = Math.Abs(kvp.Value.ValueMain - xlsMain.ValueRef) <= 5.0;
+                                }
+                                else
+                                {
+                                    valueMatch = Math.Abs(kvp.Value.ValueRef - xlsMain.ValueMain) <= 5.0;
+                                }
 
                                 if (!valueMatch)
                                     return false;
