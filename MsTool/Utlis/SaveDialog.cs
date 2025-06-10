@@ -118,13 +118,8 @@ namespace MsTool.Utlis
 
             foreach (var diff in sortedDiffs)
             {
-                if (!includeAll && diff.XlsMarker != "Nema")
+                if (!includeAll && diff.XlsMarker != "Nema" && !showAssumptions)
                     continue;
-
-                if (!showAssumptions && diff.DoubleTake)
-                {
-                    continue;
-                }
 
                 if (showAssumptions)
                 {
