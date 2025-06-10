@@ -132,7 +132,7 @@
             Controls.Add(button1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "MsTool v2.3";
+            Text = "MsTool v2.3.1";
             ResumeLayout(false);
             PerformLayout();
         }

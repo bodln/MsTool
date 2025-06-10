@@ -14,7 +14,7 @@ namespace MsTool.Utlis
             var dlg = new Form
             {
                 Width = 360,
-                Height = 200,
+                Height = 230,
                 Text = "Rezultat poređenja",
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 StartPosition = FormStartPosition.CenterParent
@@ -92,26 +92,28 @@ namespace MsTool.Utlis
                 ws.Cell("A1").Value = "Prp.";
                 ws.Cell("B1").Value = "Pozicija";
                 ws.Cell("C1").Value = "Oznaka";
-                ws.Cell("D1").Value = "Racun kod mene";
-                ws.Cell("E1").Value = "Moja vrednost";
-                ws.Cell("F1").Value = "Poreska suma";
-                ws.Cell("G1").Value = "Racun poreska";
-                ws.Cell("H1").Value = "Datum evidentiranja";
-                ws.Cell("I1").Value = "Datum obrade";
-                ws.Cell("J1").Value = "PIB";
-                ws.Cell("K1").Value = "Naziv firme";
+                ws.Cell("D1").Value = "Status";
+                ws.Cell("E1").Value = "Racun kod mene";
+                ws.Cell("F1").Value = "Moja vrednost";
+                ws.Cell("G1").Value = "Poreska suma";
+                ws.Cell("H1").Value = "Racun poreska";
+                ws.Cell("I1").Value = "Datum evidentiranja";
+                ws.Cell("J1").Value = "Datum obrade";
+                ws.Cell("K1").Value = "PIB";
+                ws.Cell("L1").Value = "Naziv firme";
             }
             else
             {
                 ws.Cell("A1").Value = "Pozicija";
                 ws.Cell("B1").Value = "Oznaka";
-                ws.Cell("C1").Value = "Moja vrednost";
-                ws.Cell("D1").Value = "Poreska suma";
-                ws.Cell("E1").Value = "Racun poreska";
-                ws.Cell("F1").Value = "Datum evidentiranja";
-                ws.Cell("G1").Value = "Datum obrade";
-                ws.Cell("H1").Value = "PIB";
-                ws.Cell("I1").Value = "Naziv firme";
+                ws.Cell("C1").Value = "Status";
+                ws.Cell("D1").Value = "Moja vrednost";
+                ws.Cell("E1").Value = "Poreska suma";
+                ws.Cell("F1").Value = "Racun poreska";
+                ws.Cell("G1").Value = "Datum evidentiranja";
+                ws.Cell("H1").Value = "Datum obrade";
+                ws.Cell("I1").Value = "PIB";
+                ws.Cell("J1").Value = "Naziv firme";
             }
 
             int excelRow = 2;
@@ -126,26 +128,28 @@ namespace MsTool.Utlis
                     ws.Cell(excelRow, 1).Value = diff.DoubleTake ? "-->" : "";
                     ws.Cell(excelRow, 2).Value = diff.Position;
                     ws.Cell(excelRow, 3).Value = diff.XlsMarker;
-                    ws.Cell(excelRow, 4).Value = diff.XlsOriginalKey;
-                    ws.Cell(excelRow, 5).Value = diff.XlsValue;
-                    ws.Cell(excelRow, 6).Value = diff.CsvSumValue;
-                    ws.Cell(excelRow, 7).Value = diff.CsvOriginalKey;
-                    ws.Cell(excelRow, 8).Value = diff.CsvDate1;
-                    ws.Cell(excelRow, 9).Value = diff.CsvDate2;
-                    ws.Cell(excelRow, 10).Value = diff.Pib;
-                    ws.Cell(excelRow, 11).Value = diff.CompanyName;
+                    ws.Cell(excelRow, 4).Value = diff.Status;
+                    ws.Cell(excelRow, 5).Value = diff.XlsOriginalKey;
+                    ws.Cell(excelRow, 6).Value = diff.XlsValue;
+                    ws.Cell(excelRow, 7).Value = diff.CsvSumValue;
+                    ws.Cell(excelRow, 8).Value = diff.CsvOriginalKey;
+                    ws.Cell(excelRow, 9).Value = diff.CsvDate1;
+                    ws.Cell(excelRow, 10).Value = diff.CsvDate2;
+                    ws.Cell(excelRow, 11).Value = diff.Pib;
+                    ws.Cell(excelRow, 12).Value = diff.CompanyName;
                 }
                 else
                 {
                     ws.Cell(excelRow, 1).Value = diff.Position;
                     ws.Cell(excelRow, 2).Value = diff.XlsMarker;
-                    ws.Cell(excelRow, 3).Value = diff.XlsValue;
-                    ws.Cell(excelRow, 4).Value = diff.CsvSumValue;
-                    ws.Cell(excelRow, 5).Value = diff.CsvOriginalKey;
-                    ws.Cell(excelRow, 6).Value = diff.CsvDate1;
-                    ws.Cell(excelRow, 7).Value = diff.CsvDate2;
-                    ws.Cell(excelRow, 8).Value = diff.Pib;
-                    ws.Cell(excelRow, 9).Value = diff.CompanyName;
+                    ws.Cell(excelRow, 3).Value = diff.Status;
+                    ws.Cell(excelRow, 4).Value = diff.XlsValue;
+                    ws.Cell(excelRow, 5).Value = diff.CsvSumValue;
+                    ws.Cell(excelRow, 6).Value = diff.CsvOriginalKey;
+                    ws.Cell(excelRow, 7).Value = diff.CsvDate1;
+                    ws.Cell(excelRow, 8).Value = diff.CsvDate2;
+                    ws.Cell(excelRow, 9).Value = diff.Pib;
+                    ws.Cell(excelRow, 10).Value = diff.CompanyName;
                 }
 
                 excelRow++;

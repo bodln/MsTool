@@ -21,7 +21,8 @@ namespace MsTool.Models
         string Date2, // Datum obrade
         string Position, 
         string Pib, 
-        int Flag
+        int Flag,
+        string Status
     );
 
     public record DiffRecord
@@ -37,6 +38,7 @@ namespace MsTool.Models
         public string Pib { get; set; }
         public string CompanyName { get; set; }
         public bool DoubleTake { get; set; }
+        public string Status { get; set; }
     }
 
     public record XlsAnalyticsRecord(

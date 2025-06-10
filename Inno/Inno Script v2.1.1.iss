@@ -2,8 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MsTool"
-#define MyAppVersion "2.1.1"
-#define MyAppPublisher "Red"
+#define MyAppVersion "2.2.1"
+#define MyAppPublisher "My Company, Inc."
+#define MyAppURL "https://www.example.com/"
 #define MyAppExeName "MsTool.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".myp"
@@ -12,11 +13,14 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{94DEAD84-8A2B-420A-95D9-D7346A047E5E}
+AppId={{DA5AACEC-1C29-4FDD-A9C6-FE82DEF905ED}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
@@ -31,7 +35,7 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
-OutputBaseFilename=MsTool v2.1.1
+OutputBaseFilename=MsTool v2.2.1
 SolidCompression=yes
 WizardStyle=modern
 
@@ -43,7 +47,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\BouncyCastle.Cryptography.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\chromedriver.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\ClosedXML.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -77,6 +80,7 @@ Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\System.Securi
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\System.Security.Cryptography.Xml.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\WebDriver.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\WebDriver.Support.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Skola\.projekti\MsTool\MsTool\bin\Debug\net8.0-windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

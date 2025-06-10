@@ -95,7 +95,8 @@ namespace MsTool.Utlis
                             CsvDate1 = csv.Date1,
                             CsvDate2 = csv.Date2,
                             CompanyName = "",
-                            DoubleTake = doubleTake
+                            DoubleTake = doubleTake,
+                            Status = csv.Status
                         });
                     }
                 }

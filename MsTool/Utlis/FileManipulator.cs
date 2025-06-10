@@ -169,19 +169,26 @@ namespace MsTool.Utlis
                 string position = csv.GetField(0);
                 string pib = csv.GetField("PIB prodavca");
 
+                string status = csv.GetField("Status");
+
+                if (status == null)
+                {
+                    status = "Nema kolona";
+                }
+
                 if (v3 != 0 && v1 == 0)
                 {
                     sum = v3;
-                    dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 2); // See Flag correspondence above
+                    dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 2, status); // See Flag correspondence above
                 }
                 else if (v4 != 0 && v2 == 0)
                 {
                     sum = v4;
-                    dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 3);
+                    dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 3, status);
                 }
                 else
                 {
-                    dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 1);
+                    dict[cleanKey] = new CsvRecord(origKey, sum, date1, date2, position, pib, 1, status);
                 }
             }
 

@@ -26,7 +26,7 @@ namespace MsTool.Utlis
             var dlg = new Form
             {
                 Width = 360,
-                Height = 200,
+                Height = 230,
                 Text = "Rezultat poređenja",
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 StartPosition = FormStartPosition.CenterParent
