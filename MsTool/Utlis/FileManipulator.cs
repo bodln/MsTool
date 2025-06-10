@@ -59,13 +59,15 @@ namespace MsTool.Utlis
             var ws = wb.Worksheet(1);
             var dict = new Dictionary<string, XlsRecord>();
 
+            int startingRow = GetStartingRow(path);
+
             // Identify populated columns in rows 10 and 11
-            var populatedColsRow10 = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
-                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(10, col).GetString()))
+            var populatedColsRowFirst = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
+                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(startingRow, col).GetString()))
                 .ToArray();
 
-            var populatedColsRow11 = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
-                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(11, col).GetString()))
+            var populatedColsRowSecond = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
+                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(startingRow + 1, col).GetString()))
                 .ToArray();
 
             int ifraCol = -1, // Column number of the bill number
@@ -73,18 +75,18 @@ namespace MsTool.Utlis
                 substitCol2 = -1, // -||- of the values relevant to Flag 2
                 substitCol3 = -1; // -||- of the values relevant to Flag 3
 
-            ifraCol = populatedColsRow11[3];
-            valueCol = populatedColsRow10[6];
+            ifraCol = populatedColsRowSecond[3];
+            valueCol = populatedColsRowFirst[6];
 
-            int dateCol1 = populatedColsRow10[3], // DATPRI
-                dateCol2 = populatedColsRow10[4]; // DATDOK
+            int dateCol1 = populatedColsRowFirst[3], // DATPRI
+                dateCol2 = populatedColsRowFirst[4]; // DATDOK
 
-            for (int row = 10; ; row += 2) // Data begins on row 10
+            for (int row = startingRow; ; row += 2) // Data begins on row 10
             {
-                var rawMarker = ws.Cell(row, populatedColsRow10[1]).GetString();
+                var rawMarker = ws.Cell(row, populatedColsRowFirst[1]).GetString();
                 if (string.IsNullOrWhiteSpace(rawMarker))
-                    rawMarker = ws.Cell(++row, populatedColsRow10[1]).GetString();
-                if (string.IsNullOrWhiteSpace(ws.Cell(row, populatedColsRow10[0]).GetString()))
+                    rawMarker = ws.Cell(++row, populatedColsRowFirst[1]).GetString();
+                if (string.IsNullOrWhiteSpace(ws.Cell(row, populatedColsRowFirst[0]).GetString()))
                     break;
 
                 var marker = rawMarker.Trim().ToUpper(); // ex. UN0
@@ -240,5 +242,43 @@ namespace MsTool.Utlis
         private static string Normalize(string input) =>
             Regex.Replace(input ?? "", @"[^\u0020-\u007E]", "")
                  .ToUpperInvariant();
+
+        public static int GetStartingRow(string filePath)
+        {
+            if (!System.IO.File.Exists(filePath))
+            {
+                Console.WriteLine($"Error: File not found at {filePath}");
+                return -1;
+            }
+
+            try
+            {
+                using (var wb = new XLWorkbook(filePath))
+                {
+                    var ws = wb.Worksheet(1);
+
+                    foreach (var row in ws.RowsUsed())
+                    {
+                        var cellA = row.Cell(1);
+
+                        if (cellA.TryGetValue(out double numericValue) && numericValue == 1.0)
+                        {
+                            return row.RowNumber();
+                        }
+                        else if (cellA.GetString().Equals("1", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return row.RowNumber();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while reading the Excel file to find starting row: {ex.Message}");
+                return -1;
+            }
+
+            return -1;
+        }
     }
 }
