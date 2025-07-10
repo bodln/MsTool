@@ -66,8 +66,10 @@ namespace MsTool.Utlis
                 .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(startingRow, col).GetString()))
                 .ToArray();
 
+            int firstUn0Row = FindFirstUn0Row(ws, startingRow, populatedColsRowFirst[1]);
+
             var populatedColsRowSecond = Enumerable.Range(1, ws.LastColumnUsed().ColumnNumber())
-                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(startingRow + 1, col).GetString()))
+                .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(firstUn0Row + 1, col).GetString()))
                 .ToArray();
 
             int ifraCol = -1, // Column number of the bill number
@@ -287,5 +289,19 @@ namespace MsTool.Utlis
 
             return -1;
         }
+        public static int FindFirstUn0Row(IXLWorksheet ws, int startingRow, int targetCol)
+        {
+            for (int row = startingRow; row <= ws.LastRowUsed().RowNumber(); row++)
+            {
+                string cellValue = ws.Cell(row, targetCol).GetString()?.Trim().ToUpperInvariant();
+                if (cellValue == "UN0")
+                {
+                    return row;
+                }
+            }
+
+            throw new Exception("Nema UN0 markera");
+        }
+
     }
 }
