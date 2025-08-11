@@ -158,7 +158,7 @@ namespace MsTool.Utlis
             while (csv.Read())
             {
                 string origKey = csv.GetField("Broj dokumenta");
-                string cleanKey = Regex.Replace(origKey, @"[\/\-\s]", "").ToUpperInvariant();
+                string cleanKey = Regex.Replace(origKey, @"[\/_\-\s]", "").ToUpperInvariant();
 
                 double v1 = ParseCell(csv.GetField("PDV 20%")); // PDV 20%
                 double v2 = ParseCell(csv.GetField("PDV 10%")); // PDV 10%
