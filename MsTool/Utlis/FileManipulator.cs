@@ -38,7 +38,7 @@ namespace MsTool.Utlis
 
                 double valueRef = ParseCell(ws.Cell(row, "H").GetString());
 
-                string cleanKey = Regex.Replace(origKey, @"[^A-Za-z0-9]", "");
+                string cleanKey = Regex.Replace(origKey, @"[^\p{L}\p{N}]", "");
 
                 dict[cleanKey] = new XlsAnalyticsRecord(
                     OriginalKey: origKey,
@@ -72,12 +72,14 @@ namespace MsTool.Utlis
                 .Where(col => !string.IsNullOrWhiteSpace(ws.Cell(firstUn0Row + 1, col).GetString()))
                 .ToArray();
 
+            int length = populatedColsRowSecond.Length;
+
             int ifraCol = -1, // Column number of the bill number
                 valueCol = -1,  // -||- of the main relevant value (Flag 1)
                 substitCol2 = -1, // -||- of the values relevant to Flag 2
                 substitCol3 = -1; // -||- of the values relevant to Flag 3
 
-            ifraCol = populatedColsRowSecond[3];
+            ifraCol = populatedColsRowSecond.Length == 6 ? populatedColsRowSecond[3] : populatedColsRowSecond[2];
             valueCol = populatedColsRowFirst[6];
 
             int dateCol1 = populatedColsRowFirst[3], // DATPRI
@@ -94,7 +96,7 @@ namespace MsTool.Utlis
                 var marker = rawMarker.Trim().ToUpper(); // ex. UN0
 
                 string origKey = ws.Cell(row + 1, ifraCol).GetString(); // Original bill number
-                string cleanKey = Regex.Replace(origKey, @"[\/\-\s]", "").ToUpperInvariant();
+                string cleanKey = Regex.Replace(origKey, @"[^\p{L}\p{N}]", "").ToUpperInvariant();
                 double val = ParseCell(ws.Cell(row, valueCol).GetString());
                 int flag = 1;
 
@@ -158,7 +160,7 @@ namespace MsTool.Utlis
             while (csv.Read())
             {
                 string origKey = csv.GetField("Broj dokumenta");
-                string cleanKey = Regex.Replace(origKey, @"[\/_\-\s]", "").ToUpperInvariant();
+                string cleanKey = Regex.Replace(origKey, @"[^\p{L}\p{N}]", "").ToUpperInvariant();
 
                 double v1 = ParseCell(csv.GetField("PDV 20%")); // PDV 20%
                 double v2 = ParseCell(csv.GetField("PDV 10%")); // PDV 10%
