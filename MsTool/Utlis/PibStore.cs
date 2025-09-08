@@ -76,6 +76,19 @@ namespace MsTool.Utlis
             _cmdUpsert.ExecuteNonQuery();
         }
 
+        public void Delete(string pib)
+        {
+            if (string.IsNullOrWhiteSpace(pib)) return;
+
+            _cache.Remove(pib);
+
+            using (var cmd = new SQLiteCommand("DELETE FROM Pibs WHERE PiB = @pib;", _conn))
+            {
+                cmd.Parameters.AddWithValue("@pib", pib);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public IReadOnlyDictionary<string, string> GetAll()
             => new Dictionary<string, string>(_cache);
 

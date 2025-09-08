@@ -31,7 +31,7 @@ namespace MsTool
         public Form1()
         {
             InitializeComponent();
-            //AllocConsole();
+            AllocConsole();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             //// Setup selenium once and use it for all searches
@@ -146,6 +146,11 @@ namespace MsTool
 
                 checkBox1.Enabled = true;
             }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            PibStore.Instance.Delete("100000821");
         }
 
         // Selenium <----------------------------------------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 
 namespace MsTool.Utlis
 {
@@ -23,13 +23,11 @@ namespace MsTool.Utlis
 
         static NbsPibLookup()
         {
-            // A realistic User-Agent so the server treats us like a browser
             _http.DefaultRequestHeaders.UserAgent.ParseAdd(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                 "AppleWebKit/537.36 (KHTML, like Gecko) " +
                 "Chrome/112.0.0.0 Safari/537.36"
             );
-            // Accept headers for HTML
             _http.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         }
 
@@ -38,11 +36,21 @@ namespace MsTool.Utlis
             if (string.IsNullOrWhiteSpace(pib))
                 return "";
 
-            const string url = "https://www.nbs.rs/rir_pn/pn_rir.html.jsp?type=rir_results&lang=SER_CIR&konverzija=yes";
+            const string url = "https://webappcenter.nbs.rs/PnWebApp/CompanyAccount/CompanyAccountResident?isSearchExecuted=true";
+
             var form = new Dictionary<string, string>
             {
-                ["pib"] = pib,
-                ["Submit"] = "Pretraži" // Identificator from the URLs HTML
+                ["BankCode"] = "",
+                ["AccountNumber"] = "",
+                ["ControlNumber"] = "",
+                ["CompanyNationalCode"] = "",
+                ["CompanyTaxCode"] = pib,
+                ["CompanyName"] = "",
+                ["City"] = "",
+                ["TypeID"] = "1",
+                ["OrderBy"] = "",
+                ["Pagging.CurrentPage"] = "1",
+                ["Pagging.PageSize"] = ""
             };
 
             for (int attempt = 1; attempt <= 3; attempt++)
@@ -59,20 +67,19 @@ namespace MsTool.Utlis
 
                     var doc = new HtmlAgilityPack.HtmlDocument();
                     doc.LoadHtml(html);
-                    var node = doc.DocumentNode.SelectSingleNode("//input[@name='nazivULinku']");
+                    var node = doc.DocumentNode.SelectSingleNode("//table[contains(@class,'responsive-table')]/tbody/tr/td[1]");
                     if (node != null)
                     {
-                        var raw = node.GetAttributeValue("value", "");
-                        Debug.WriteLine($"[DEBUG] Found nazivULinku = {raw}");
-                        return raw.Trim('\"');
+                        var raw = WebUtility.HtmlDecode(node.InnerText.Trim());
+                        Debug.WriteLine($"[DEBUG] Found company name = {raw}");
+                        return raw;
                     }
-                    Debug.WriteLine("[DEBUG] No nazivULinku input found in response.");
+                    Debug.WriteLine("[DEBUG] No company name found in response table.");
                     return "";
                 }
                 catch (HttpRequestException ex) when (ex.InnerException is IOException)
                 {
                     Debug.WriteLine($"[WARN] Network error on attempt {attempt}: {ex.Message}");
-                    // exponential backoff: 500ms, 1000ms, 2000ms
                     await Task.Delay(500 * (1 << attempt - 1));
                 }
                 catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)

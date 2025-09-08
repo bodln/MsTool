@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows; // Ako koristite WinForms, menjajte u System.Windows.Forms
 
 namespace MsTool.Utlis
 {
@@ -24,45 +25,54 @@ namespace MsTool.Utlis
                 var csvRecs = FileManipulator.LoadCsv(csvPath);
                 var xlsRecs = FileManipulator.LoadXls(xlsPath, csvRecs);
 
-                //foreach (var kvp in csvRecs)
-                //{
-                //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-                //}
-
-                //foreach (var kvp in xlsRecs)
-                //{
-                //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
-                //}
-
-                List<DiffRecord>  diffs = new List<DiffRecord>();
+                List<DiffRecord> diffs = new List<DiffRecord>();
 
                 foreach (var key in csvRecs.Keys)
                 {
+                    if (key == null)
+                    {
+                        Console.WriteLine("⚠ Nađen je NULL ključ u CSV podacima – preskačem taj zapis.");
+                        continue;
+                    }
+
                     var csv = csvRecs[key];
-                    xlsRecs.TryGetValue(key, out var xls);
+                    if (csv == null)
+                    {
+                        Console.WriteLine($"⚠ Null vrednost za ključ '{key}' u CSV podacima – preskačem.");
+                        continue;
+                    }
+
+                    if (!xlsRecs.TryGetValue(key, out var xls))
+                    {
+                        xls = null;
+                    }
 
                     double xVal = xls?.Value ?? 0;
                     double cSum = csv.SumValue;
                     string xOrig = xls?.OriginalKey ?? "";
 
                     bool equal = Math.Abs(xVal - cSum) <= 5.0;
-                    bool doubleTake = false; // Flag used to signal second round of searches was done, the one by value and date pair
+                    bool doubleTake = false;
 
                     if (!equal)
                     {
                         var matchingKey = xlsRecs
                            .Where(kvp =>
                            {
-                               bool valueMatch = Math.Abs(kvp.Value.Value - cSum) <= 5.0;
+                               if (kvp.Value == null)
+                               {
+                                   Console.WriteLine("⚠ Null vrednost u XLS podacima – preskačem poređenje.");
+                                   return false;
+                               }
 
+                               bool valueMatch = Math.Abs(kvp.Value.Value - cSum) <= 5.0;
                                if (!valueMatch)
                                    return false;
 
                                if (!DateTime.TryParseExact(kvp.Value.Date, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var xlsDate))
                                    return false;
 
-                               var cleanCsvDate = csv.Date1.TrimEnd('.');
-
+                               var cleanCsvDate = csv.Date1?.TrimEnd('.') ?? "";
                                if (!DateTime.TryParseExact(cleanCsvDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var csvDate))
                                    return false;
 
@@ -90,13 +100,13 @@ namespace MsTool.Utlis
                             XlsOriginalKey = xOrig ?? "Nema",
                             XlsValue = xVal,
                             CsvSumValue = cSum,
-                            CsvOriginalKey = csv.OriginalKey,
-                            Pib = csv.Pib,
-                            CsvDate1 = csv.Date1,
-                            CsvDate2 = csv.Date2,
+                            CsvOriginalKey = csv.OriginalKey ?? "Nema",
+                            Pib = csv.Pib ?? "",
+                            CsvDate1 = csv.Date1 ?? "",
+                            CsvDate2 = csv.Date2 ?? "",
                             CompanyName = "",
                             DoubleTake = doubleTake,
-                            Status = csv.Status
+                            Status = csv.Status ?? ""
                         });
                     }
                 }
@@ -106,28 +116,37 @@ namespace MsTool.Utlis
                     if (string.IsNullOrWhiteSpace(diff.Pib))
                     {
                         diff.CompanyName = "";
+                        Console.WriteLine($"⚠ Nedostaje PIB za poziciju {diff.Position}");
                         continue;
                     }
 
-                    var name = PibStore.Instance.Lookup(diff.Pib);
-
-                    if (name == null)
+                    string name = null;
+                    try
                     {
-                        name = await NbsPibLookup.LookupNameAsync(diff.Pib) ?? "";
-
-                        PibStore.Instance.AddOrUpdate(diff.Pib, name ?? "");
+                        name = PibStore.Instance.Lookup(diff.Pib);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"⚠ Greška pri čitanju iz PibStore za PIB {diff.Pib}: {ex.Message}");
                     }
 
-                    diff.CompanyName = name;
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        try
+                        {
+                            name = await NbsPibLookup.LookupNameAsync(diff.Pib) ?? "";
+                            PibStore.Instance.AddOrUpdate(diff.Pib, name ?? "");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"⚠ Greška pri online pretrazi PIB-a {diff.Pib}: {ex.Message}");
+                        }
+                    }
+
+                    diff.CompanyName = name ?? "";
                 }
 
                 SaveDialog.ShowSaveDialog(diffs, allMistakes, assumptions);
-
-                //IReadOnlyDictionary<string, string> db = PibStore.Instance.GetAll();
-                //db.ToList().ForEach(kvp => Console.WriteLine($"{kvp.Key} -> {kvp.Value}"));
-
-                //if (File.Exists(xlsPath))
-                //    File.Delete(xlsPath);
             }
             catch (Exception ex)
             {
