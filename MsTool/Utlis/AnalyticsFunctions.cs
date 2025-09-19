@@ -1,13 +1,4 @@
-﻿using MathNet.Numerics;
-using MsTool.Models;
-using NPOI.OpenXmlFormats.Vml;
-using SixLabors.ImageSharp.ColorSpaces;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MsTool.Models;
 
 namespace MsTool.Utlis
 {
@@ -23,8 +14,8 @@ namespace MsTool.Utlis
 
             try
             {
-                var xlsMainRecs = FileManipulator.LoadXlsAnalytics(xlsMainPath); // What csv was for BoB
-                var xlsRefRecs = FileManipulator.LoadXlsAnalytics(xlsRefPath); 
+                var xlsMainRecs = FileManipulator.LoadXlsAnalytics(xlsMainPath, true); // What csv was for BoB
+                var xlsRefRecs = FileManipulator.LoadXlsAnalytics(xlsRefPath, false);
 
                 List<DiffAnalyticsRecord> diffs = new List<DiffAnalyticsRecord>();
 
@@ -33,72 +24,63 @@ namespace MsTool.Utlis
                     var xlsMain = xlsMainRecs[key];
                     xlsRefRecs.TryGetValue(key, out var xlsRef);
 
-                    double refVal = xlsRef?.ValueRef ?? 0;
-                    double refValSecundum = xlsRef?.ValueMain ?? 0;
+                    double refDebit = xlsRef?.ValueDebit ?? 0;
+                    double refCredit = xlsRef?.ValueCredit ?? 0;
+
+                    double mainDebit = xlsMain?.ValueDebit ?? 0;
+                    double mainCredit = xlsMain?.ValueCredit ?? 0;
+
+                    bool altCompFlag = xlsMain!.AltCompFlag;
+
+                    bool equalityAssumption = false;
 
                     bool equal = true;
 
-                    if (xlsMain.ValueMain == 0 && xlsMain.ValueRef != 0) // Enables cross comparation both ways
+                    double difference = 0;
+
+                    if (xlsRef == null)
                     {
-                        equal = Math.Abs(refValSecundum - xlsMain.ValueRef) <= 5.0;
-                    }
-                    else
-                    {
-                        equal = Math.Abs(refVal - xlsMain.ValueMain) <= 5.0;
-                    }
+                        equal = false;
 
-                    bool doubleTake = false;
-
-                    if (!equal)
-                    {
-                        var matchingKey = xlsRefRecs
-                            .Where(kvp =>
-                            {
-                                bool valueMatch = false;
-
-                                if (kvp.Value.ValueMain != 0 && kvp.Value.ValueRef == 0) // Enables cross comparation both ways
-                                {
-                                    valueMatch = Math.Abs(kvp.Value.ValueMain - xlsMain.ValueRef) <= 5.0;
-                                }
-                                else
-                                {
-                                    valueMatch = Math.Abs(kvp.Value.ValueRef - xlsMain.ValueMain) <= 5.0;
-                                }
-
-                                if (!valueMatch)
-                                    return false;
-
-                                if (!DateTime.TryParseExact(kvp.Value.Date, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var xlsRelativeDate))
-                                    return false;
-
-                                if (!DateTime.TryParseExact(xlsMain.Date, "dd-MM-yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var xlsMainDate))
-                                    return false;
-
-                                return xlsRelativeDate.Date == xlsMainDate.Date;
-                            })
-                            .Select(kvp => kvp.Key)
-                            .FirstOrDefault();
-
-                        if (matchingKey != null)
+                        if (!altCompFlag)
                         {
-                            doubleTake = true;
-                            xlsRef = xlsRefRecs[matchingKey];
+                            foreach (var refRec in xlsRefRecs)
+                            {
+                                if (refRec.Value.Date.ToString() == xlsMain.Date.ToString() &&
+                                    refRec.Value.AltCompFlag == false &&
+                                    (Math.Abs(mainDebit - refRec.Value.ValueCredit) <= 5.0) == true)
+                                {
+                                    equalityAssumption = true;
+                                }
+                            }
                         }
                     }
+                    else if (altCompFlag)
+                    {
+                        if (!(Math.Abs(mainCredit - refDebit) <= 5.0))
+                        {
+                            equal = false;
+                            difference = mainCredit - refDebit;
+                        }
+                    }
+                    else if (!(Math.Abs(mainDebit - refCredit) <= 5.0))
+                    {
+                        equal = false;
+                    }
 
-                    if (xlsRef == null || !equal)
+                    if (!equal || equalityAssumption)
                     {
                         diffs.Add(new DiffAnalyticsRecord
                         {
-                            OriginalMainKey = xlsMain.OriginalKey,
+                            OriginalMainKey = altCompFlag ? "-" : xlsMain.OriginalKey,
                             OriginalRefKey = xlsRef?.OriginalKey ?? "Nema",
-                            ValueMain = xlsMain.ValueMain,
-                            ValueRef = refVal,
+                            ValueDebit = mainDebit,
+                            ValueCreditDiff = difference,
                             DateMain = xlsMain.Date,
                             DateRef = xlsRef?.Date ?? "",
                             AccountMain = xlsMain.Account,
                             AccountRef = xlsRef?.Account ?? "",
-                            DoubleTake = doubleTake
+                            AssumedEqual = equalityAssumption
                         });
                     }
                 }

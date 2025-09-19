@@ -11,7 +11,7 @@ namespace MsTool.Utlis
 {
     public static class FileManipulator
     {
-        public static Dictionary<string, XlsAnalyticsRecord> LoadXlsAnalytics(string path)
+        public static Dictionary<string, XlsAnalyticsRecord> LoadXlsAnalytics(string path, bool isMain)
         {
             var wb = new XLWorkbook(path);
             var ws = wb.Worksheet(1);
@@ -34,19 +34,43 @@ namespace MsTool.Utlis
                 string date = ws.Cell(row, "B").GetString().Trim();
                 string account = ws.Cell(row, "K").GetString().Trim();
 
-                double valueMain = ParseCell(ws.Cell(row, "F").GetString());
+                double valueDebit = ParseCell(ws.Cell(row, "F").GetString());
 
-                double valueRef = ParseCell(ws.Cell(row, "H").GetString());
+                double valueCredit = ParseCell(ws.Cell(row, "H").GetString());
 
                 string cleanKey = Regex.Replace(origKey, @"[^\p{L}\p{N}]", "");
 
+                bool flag = false;
+
+                if (isMain)
+                {
+                    if (valueDebit == 0 && valueCredit != 0)
+                    {
+                        cleanKey = date.ToString();
+                        flag = true;
+                    }
+                }
+                else
+                {
+                    if (valueDebit != 0 && valueCredit == 0)
+                    {
+                        cleanKey = date.ToString();
+                        flag = true;
+                    }
+                }
+
+                if (dict.ContainsKey(cleanKey))
+                {
+                    continue;
+                }
+
                 dict[cleanKey] = new XlsAnalyticsRecord(
                     OriginalKey: origKey,
-                    ValueMain: valueMain,
-                    ValueRef: valueRef,
+                    ValueDebit: valueDebit,
+                    ValueCredit: valueCredit,
                     Date: date,
                     Account: account,
-                    Flag: false
+                    AltCompFlag: flag
                 );
             }
 

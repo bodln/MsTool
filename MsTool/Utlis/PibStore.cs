@@ -89,6 +89,16 @@ namespace MsTool.Utlis
             }
         }
 
+        public void DeleteAll()
+        {
+            _cache.Clear();
+
+            using (var cmd = new SQLiteCommand("DELETE FROM Pibs;", _conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public IReadOnlyDictionary<string, string> GetAll()
             => new Dictionary<string, string>(_cache);
 

@@ -14,13 +14,13 @@ namespace MsTool.Utlis
         {
             int count = 0;
 
-            if (!showAssumptions)
+            if (showAssumptions)
             {
                 count = diffs.Count();
             }
             else
             {
-                count = diffs.Where(d => d.DoubleTake == false).Count();
+                count = diffs.Where(d => d.AssumedEqual == false).Count();
             }
 
             var dlg = new Form
@@ -106,44 +106,44 @@ namespace MsTool.Utlis
             {
                 ws.Cell("A1").Value = "Prp.";
                 ws.Cell("B1").Value = "Datum";
-                ws.Cell("C1").Value = "Racun";
-                ws.Cell("D1").Value = "Duguje";
-                ws.Cell("E1").Value = "Potrazuje";
+                ws.Cell("C1").Value = "Broj racuna";
+                ws.Cell("D1").Value = "Nedostajuci racuni";
+                ws.Cell("E1").Value = "Razlika uplata";
             }
             else
             {
                 ws.Cell("A1").Value = "Datum";
-                ws.Cell("B1").Value = "Racun";
-                ws.Cell("C1").Value = "Duguje";
-                ws.Cell("D1").Value = "Potrazuje";
+                ws.Cell("B1").Value = "Broj racuna";
+                ws.Cell("C1").Value = "Nedostajuci racuni";
+                ws.Cell("D1").Value = "Razlika uplata";
             }
 
             int excelRow = 2;
 
             foreach (var diff in sortedDiffs)
             {
-                if (!showAssumptions && diff.DoubleTake)
+                if (!showAssumptions && diff.AssumedEqual)
                 {
                     continue;
                 }
 
-                sumMain += diff.ValueMain;
-                sumRef += diff.ValueRef;
+                sumMain += diff.ValueDebit;
+                sumRef += diff.ValueCreditDiff;
 
                 if (showAssumptions)
                 {
-                    ws.Cell(excelRow, 1).Value = diff.DoubleTake ? "-->" : "";
+                    ws.Cell(excelRow, 1).Value = diff.AssumedEqual ? "-->" : "";
                     ws.Cell(excelRow, 2).Value = diff.DateMain;
                     ws.Cell(excelRow, 3).Value = diff.OriginalMainKey;
-                    ws.Cell(excelRow, 4).Value = diff.ValueMain;
-                    ws.Cell(excelRow, 5).Value = diff.ValueRef;
+                    ws.Cell(excelRow, 4).Value = diff.ValueDebit;
+                    ws.Cell(excelRow, 5).Value = diff.ValueCreditDiff;
                 }
                 else
                 {
                     ws.Cell(excelRow, 1).Value = diff.DateMain;
                     ws.Cell(excelRow, 2).Value = diff.OriginalMainKey;
-                    ws.Cell(excelRow, 3).Value = diff.ValueMain;
-                    ws.Cell(excelRow, 4).Value = diff.ValueRef;
+                    ws.Cell(excelRow, 3).Value = diff.ValueDebit;
+                    ws.Cell(excelRow, 4).Value = diff.ValueCreditDiff;
                 }
 
                 excelRow++;

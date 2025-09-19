@@ -43,23 +43,23 @@ namespace MsTool.Models
 
     public record XlsAnalyticsRecord(
         string OriginalKey,
-        double ValueMain, // DUGUJE
-        double ValueRef, // POTRAZUJE
+        double ValueDebit, // DUGUJE
+        double ValueCredit, // POTRAZUJE
         string Date, // DATUM
         string Account, // NALOG
-        bool Flag 
+        bool AltCompFlag = false
     );
 
     public record DiffAnalyticsRecord
     {
         public string OriginalMainKey { get; set; }
         public string OriginalRefKey { get; set; }
-        public double ValueMain { get; set; }
-        public double ValueRef { get; set; }
+        public double ValueDebit { get; set; }
+        public double ValueCreditDiff { get; set; }
         public string DateMain { get; set; }
         public string DateRef { get; set; }
         public string AccountMain { get; set; }
         public string AccountRef { get; set; }
-        public bool DoubleTake { get; set; } = false;
+        public bool AssumedEqual { get; set; } = false;
     }
 }
